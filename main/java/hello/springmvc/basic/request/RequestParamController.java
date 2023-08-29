@@ -1,14 +1,17 @@
 package hello.springmvc.basic.request;
 
+import hello.springmvc.basic.HelloData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.*;
 import java.io.IOException;
 import java.util.Map;
 
@@ -111,7 +114,43 @@ public class RequestParamController {
 //   * 파라미터의 값이 1개가 확실하다면 Map을 사용해도 되지만, 그렇지 않다면 MultiValueMap을 사용하자 *
 
 
+//   실제 개발을 하면 요청 파라미터를 받아서 필요한 객체를 만들고 그 객체에 값을 넣어주어야 한다.
+//   보통 아래와 같이 코드를 작성해야 한다. (1, 2, 3의 과정)
+    @ResponseBody
+    @RequestMapping("/test")
+    public String modelAttributeV1(@RequestParam String username, @RequestParam int age){
+        HelloData data = new HelloData(); // 1
+        data.setUsername(username);       // 2
+        data.setAge(age);                 // 3
+        log.info("data={}", data);
+        return "ok";
+    }
 
+//    스프링은 1,2,3 의 과정을 자동화 해 주는 @ModelAttribute기능을 제공한다.
+//    @ModelAttribute 사용
+//    참고 : model.addAttribute(helloData); 코드도 함께 자동 적용됨, 뒤에 model을 설명할때 자세히 설명
+
+    @ResponseBody
+    @RequestMapping("/model-attribute-v1")
+    public String modelAttributeV1(@ModelAttribute HelloData data){
+        log.info("username={}, age={}", data.getUsername(), data.getAge());
+        return "ok";
+    }
+
+
+//    @ModelAttribute 생략 - modelAttributeV2
+//    @ModelAttribute 생략 가능
+//    String, int 같은 단순 타입 = @RequestParam을 생략할 수 있다.
+//    그외 나머지 클래스 = @ModelAttribute을 생략할 수 있다.
+//     예외! ) HttpServletResponse와 같이 argument resolver로 지정해둔 타입 같은 경우에는 ModelAttribute가 적용되지 않는다. (argument resolver는 뒤에서 학습한다.)
+    @ResponseBody
+    @RequestMapping("/model-attribute-v2")
+    public String modelAttributeV2(HelloData HelloData){
+        log.info("username={}, age={}", HelloData.getUsername(), HelloData.getAge());
+        return "ok";
+    }
+//    @ModelAttribute(name="asdf") HelloData helloData 와 같이 ModelAttribute에 name도 적을 수 있는데
+//    이 부분은 Spring MVC에서 뷰가 있어야 제대로 이해하기 때문에 나중에 작은 프로젝트 만드는 수업(동일 책 뒷부분) 에서 다뤄보겠다.
 
 }
 
